@@ -37,6 +37,15 @@
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: #4c1d95; }
 
+    /* ── RAIN CANVAS ── */
+    #rain-bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
     /* ─────────────────────────────────────────
        CONTACT RAIL
     ───────────────────────────────────────── */
@@ -54,6 +63,8 @@
       z-index: 999;
       backdrop-filter: blur(8px);
     }
+
+    header, section, footer { position: relative; z-index: 1; }
 
     .rail-gem {
       width: 7px;
@@ -515,6 +526,9 @@
 </head>
 <body>
 
+  <!-- RAIN BACKGROUND -->
+  <canvas id="rain-bg"></canvas>
+
   <!-- CONTACT RAIL -->
   <aside class="rail" aria-label="Contact info">
     <div class="rail-pad"></div>
@@ -714,6 +728,47 @@
     </p>
     <div class="footer-gem"></div>
   </footer>
+
+  <script>
+    const canvas = document.getElementById('rain-bg');
+    const ctx = canvas.getContext('2d');
+    const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンウフィーラス{}[]()=>const let function return 01';
+    let cols, drops, speeds;
+
+    function init() {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const size = 14;
+      cols  = Math.floor(canvas.width / size);
+      drops = Array(cols).fill(0).map(() => Math.random() * -100);
+      speeds = Array(cols).fill(0).map(() => 0.25 + Math.random() * 0.45);
+    }
+
+    function draw() {
+      ctx.fillStyle = 'rgba(6,2,14,0.055)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const size = 14;
+      drops.forEach((y, i) => {
+        const char = chars[Math.floor(Math.random() * chars.length)];
+        const isGold  = Math.random() > 0.88;
+        const isWhite = Math.random() > 0.97;
+        const alpha   = 0.12 + Math.random() * 0.22;
+        ctx.font = `${size}px monospace`;
+        ctx.fillStyle = isWhite
+          ? `rgba(255,255,255,0.7)`
+          : isGold
+            ? `rgba(201,168,76,${alpha + 0.15})`
+            : `rgba(124,58,237,${alpha})`;
+        ctx.fillText(char, i * size, y * size);
+        if (y * size > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i] += speeds[i];
+      });
+    }
+
+    init();
+    setInterval(draw, 48);
+    window.addEventListener('resize', init);
+  </script>
 
 </body>
 </html>
